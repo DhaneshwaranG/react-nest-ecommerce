@@ -1,0 +1,77 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  name          String?
+  password      String?
+  refreshTokens RefreshToken[]
+  orders        Order[]
+  createdAt     DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id                   Int      @id @default(autoincrement())
+  public_id            String   @unique @default(uuid())
+  title                String
+  description          String?
+  category             String
+  price                Float
+  discountPercentage   Float?
+  rating               Float?
+  stock                Int      @default(0)
+  tags                 String[]
+  brand                String?
+  sku                  String?
+  weight               Float?
+  dimensions           Json?
+  warrantyInformation  String?
+  shippingInformation  String?
+  availabilityStatus   String?
+  reviews              Json?
+  returnPolicy         String?
+  minimumOrderQuantity Int?
+  meta                 Json?
+  images               String[]
+  thumbnail            String?
+  isFeatured           Boolean  @default(false)
+  orderItems           OrderItem[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
